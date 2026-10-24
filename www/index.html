@@ -95,7 +95,7 @@ const DEV='702e2c6a6d479cedc26aa8a687013df5787bb1e2f6bb8e503cd94fdf92bae41a';
 let st={kind:'dot',n:70,sp:1,glow:1,tilt:1,...G('sf_st',{})},lang=G('sf_lang',(navigator.language||'ru').startsWith('ru')?'ru':'en'),sess=G('sf_sess',null),users=G('sf_users',{}),com=G('sf_cache',[]),aiOn=G('sf_ai',1),tab='cat',mood='',mode='l',step='',pend='',qv='',srvIds=null,srv=false,cur=null,ait,last=0,perr='';
 users.sh1zuho={hash:DEV,role:'dev',email:''};S('sf_users',users);
 const t=k=>T[lang][K.indexOf(k)],nat=()=>window.Capacitor?.isNativePlatform?.();
-const api=()=>(window.SF_API||G('sf_api','')||document.querySelector('meta[name=sf-api]').content||'https://sh1zuho-finder.ahmedovravil45.workers.dev').replace(/\/$/,'');
+const api=()=>(window.SF_API||document.querySelector('meta[name=sf-api]').content||'https://sh1zuho-finder.ahmedovravil45.workers.dev').replace(/\/$/,'');
 const tmo=ms=>{if(AbortSignal.timeout)return AbortSignal.timeout(ms);const k=new AbortController();setTimeout(()=>k.abort(),ms);return k.signal};
 async function jf(p,b){const h={'content-type':'application/json'};if(sess?.token)h.authorization='Bearer '+sess.token;const r=await fetch(api()+p,{method:b?'POST':'GET',headers:h,body:b&&JSON.stringify(b),signal:tmo(9000)});const j=await r.json().catch(()=>({}));if(!r.ok){if(r.status==401&&j.e=='auth'&&sess?.token){sess=null;S('sf_sess',null);vAuth()}throw j}return j}
 async function probe(){srv=false;for(let i=0;i<2&&!srv;i++){try{srv=(await jf('/api/health')).ok==1}catch(e){perr=String(e&&(e.message||e.e)||'');await new Promise(r=>setTimeout(r,800))}}}
@@ -173,7 +173,7 @@ const vSet=()=>[`<div class="win st" style="margin-top:0"><h2>${t('sBg')}</h2><d
 <div class="sr"><span>${t('sCnt')}</span><input type="range" id="sn" min="15" max="180" value="${st.n}"></div><div class="sr"><span>${t('sSpd')}</span><input type="range" id="ss" min="3" max="30" value="${st.sp*10}"></div>
 <div class="sr"><span>${t('sGlow')}</span><div class="tgl${st.glow?' on':''}" data-s="glow"></div></div><div class="sr"><span>${t('sTouch')}</span><div class="tgl${st.tilt?' on':''}" data-s="tilt"></div></div>
 <h2 style="font-size:15px;margin:16px 0 10px">${t('sLang')}</h2><div class="lg">${LN.map(([c,n])=>`<button class="ch${c==lang?' on':''}" data-l="${c}"><b>${c.toUpperCase()}</b>${n}</button>`).join('')}</div>
-<div class="f" style="margin-top:14px"><input id="sv" placeholder=" " value="${esc(G('sf_api',''))}" autocapitalize="none" spellcheck="false"><label for="sv">${t('sSrv')}</label></div><button class="btn g" data-a="test" style="width:100%">${t('sTest')}</button><div class="msg" id="sm"></div><button class="btn g" id="lo" style="width:100%">${t('out')}</button></div>`,()=>{}];
+<button class="btn g" id="lo" style="width:100%;margin-top:18px">${t('out')}</button></div>`,()=>{}];
 /* ===== auth ===== */
 function vAuth(){step='';const r=mode=='r';$('#nv').hidden=true;show(`<div class="win st"><div class="logo">sh1zuho <span>finder</span></div><div class="tabs${r?' r':''}" id="tb"><i></i><button data-m="l" class="${r?'':'on'}">${t('login')}</button><button data-m="r" class="${r?'on':''}">${t('reg')}</button></div><div id="fm"><div class="f"><input id="u" placeholder=" " autocomplete="username" autocapitalize="none" spellcheck="false"><label for="u">${t('user')}</label></div><div class="col${r?' o':''}" id="em"><div><div class="f"><input id="e" type="email" placeholder=" " autocomplete="email"><label for="e">${t('mail')}</label></div></div></div><div class="f"><input id="p" type="password" placeholder=" " autocomplete="${r?'new-password':'current-password'}"><label for="p">${t('pass')}</label></div></div><div class="msg" id="ms"></div><button class="btn" id="ok" style="width:100%">${t(r?'reg':'login')}</button><div class="hint"${srv?'':' data-a="retry" style="cursor:pointer"'}>${srv?t('ok'):t('fail')+' ↻'}</div></div>`)}
 const busy=b=>$('#ok')?.classList.toggle('ld',b);
@@ -205,7 +205,6 @@ else if(d.l){lang=d.l;S('sf_lang',lang);document.documentElement.lang=lang;if($(
 else if(d.s){st[d.s]=st[d.s]?0:1;sav();x.classList.toggle('on')}
 else if(d.m){mode=d.m;const r=mode=='r';$('#tb').classList.toggle('r',r);document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b==x));$('#em').classList.toggle('o',r);$('#ok').textContent=t(r?'reg':'login');$('#ms').textContent=''}
 else if(d.a=='retry'){x.textContent='…';await probe();vAuth()}
-else if(d.a=='test'){S('sf_api',$('#sv').value.trim());await probe();$('#sm').textContent=t(srv?'ok':'fail');if(srv&&!sess.token){sess=null;S('sf_sess',null);setTimeout(vAuth,900)}}
 else if(x.id=='ai'){aiOn=aiOn?0:1;S('sf_ai',aiOn);srvIds=null;vHome()}
 else if(x.id=='sy'){x.classList.add('sp');await load();list(1);info();x.classList.remove('sp')}
 else if(x.id=='up'){const b=$('#up'),m=$('#um');b.classList.add('ld');m.textContent=t('chk');try{await jf('/api/upload',{code:$('#uc').value.trim(),n:$('#un').value,a:$('#ua').value});m.textContent=t('done');await load();$('#uc').value=$('#un').value=$('#ua').value=''}catch(e){m.textContent=t(e.e=='bad'?'bad':e.e=='dup'?'dup':'err')}b.classList.remove('ld')}
