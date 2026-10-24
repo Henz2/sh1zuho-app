@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#000000"><meta name="sf-api" content="">
+<meta name="theme-color" content="#000000"><meta name="sf-api" content="https://sh1zuho-finder.ahmedovravil45.workers.dev">
 <title>sh1zuho finder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
 <style>
@@ -67,7 +67,7 @@ code{font:12px ui-monospace,Menlo,monospace;color:#bbb}
 /* intro */
 #in{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center;transition:opacity 1s var(--e),filter 1s,transform 1s var(--e)}
 #in.x{opacity:0;filter:blur(14px);transform:scale(1.06);pointer-events:none}
-#sg{position:relative;transform-origin:0 0}#sg img,#pen{position:absolute;display:block;user-select:none;-webkit-user-drag:none}#sg img{opacity:0}
+#sg{position:relative;transform-origin:0 0;flex:none}#sg img,#pen{position:absolute;display:block;user-select:none;-webkit-user-drag:none}#sg img{opacity:0}
 #tx{-webkit-mask-image:linear-gradient(90deg,#000 calc(var(--p,0)*1% - 5%),transparent calc(var(--p,0)*1%));mask-image:linear-gradient(90deg,#000 calc(var(--p,0)*1% - 5%),transparent calc(var(--p,0)*1%))}#tx.on{opacity:1}
 #pen{width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:radial-gradient(#fff,#fff8 22%,transparent 68%);opacity:0;pointer-events:none;mix-blend-mode:screen}
 #ln{clip-path:inset(0 50% 0 50%);transition:clip-path 2s cubic-bezier(.4,0,.2,1),opacity .6s}#ln.on{opacity:1;clip-path:inset(0)}
@@ -92,12 +92,13 @@ const KI=['dot','snow','leaf','star','planet','note'],KN={"ru": ["Точки", "
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const G=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},S=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const DEV='702e2c6a6d479cedc26aa8a687013df5787bb1e2f6bb8e503cd94fdf92bae41a';
-let st={kind:'dot',n:70,sp:1,glow:1,tilt:1,...G('sf_st',{})},lang=G('sf_lang',(navigator.language||'ru').startsWith('ru')?'ru':'en'),sess=G('sf_sess',null),users=G('sf_users',{}),com=G('sf_cache',[]),aiOn=G('sf_ai',1),tab='cat',mood='',mode='l',step='',pend='',qv='',srvIds=null,srv=false,cur=null,ait,last=0;
+let st={kind:'dot',n:70,sp:1,glow:1,tilt:1,...G('sf_st',{})},lang=G('sf_lang',(navigator.language||'ru').startsWith('ru')?'ru':'en'),sess=G('sf_sess',null),users=G('sf_users',{}),com=G('sf_cache',[]),aiOn=G('sf_ai',1),tab='cat',mood='',mode='l',step='',pend='',qv='',srvIds=null,srv=false,cur=null,ait,last=0,perr='';
 users.sh1zuho={hash:DEV,role:'dev',email:''};S('sf_users',users);
 const t=k=>T[lang][K.indexOf(k)],nat=()=>window.Capacitor?.isNativePlatform?.();
-const api=()=>(window.SF_API||G('sf_api','')||document.querySelector('meta[name=sf-api]').content||'').replace(/\/$/,'');
-async function jf(p,b){const h={'content-type':'application/json'};if(sess?.token)h.authorization='Bearer '+sess.token;const r=await fetch(api()+p,{method:b?'POST':'GET',headers:h,body:b&&JSON.stringify(b),signal:AbortSignal.timeout(9000)});const j=await r.json().catch(()=>({}));if(!r.ok)throw j;return j}
-async function probe(){try{srv=!!api()&&(await jf('/api/health')).ok==1}catch{srv=false}}
+const api=()=>(window.SF_API||G('sf_api','')||document.querySelector('meta[name=sf-api]').content||'https://sh1zuho-finder.ahmedovravil45.workers.dev').replace(/\/$/,'');
+const tmo=ms=>{if(AbortSignal.timeout)return AbortSignal.timeout(ms);const k=new AbortController();setTimeout(()=>k.abort(),ms);return k.signal};
+async function jf(p,b){const h={'content-type':'application/json'};if(sess?.token)h.authorization='Bearer '+sess.token;const r=await fetch(api()+p,{method:b?'POST':'GET',headers:h,body:b&&JSON.stringify(b),signal:tmo(9000)});const j=await r.json().catch(()=>({}));if(!r.ok){if(r.status==401&&j.e=='auth'&&sess?.token){sess=null;S('sf_sess',null);vAuth()}throw j}return j}
+async function probe(){srv=false;for(let i=0;i<2&&!srv;i++){try{srv=(await jf('/api/health')).ok==1}catch(e){perr=String(e&&(e.message||e.e)||'');await new Promise(r=>setTimeout(r,800))}}}
 async function hp(l,p){const e=new TextEncoder(),k=await crypto.subtle.importKey('raw',e.encode(p),'PBKDF2',false,['deriveBits']);return[...new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:e.encode('sh1zuho:'+l),iterations:150000},k,256))].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function show(h,after){const a=$('#app'),put=()=>{a.innerHTML=h;a.classList.remove('out');after&&after()};if(!a.innerHTML)return put();a.classList.add('out');setTimeout(put,230)}
 const toast=m=>{const e=$('#ts');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)};
@@ -119,7 +120,7 @@ for(const p of P){p.ph+=.012;p.a+=p.w;p.y+=p.v*st.sp+p.dy;p.x+=Math.sin(p.ph)*.3
 p.x+=tilt*1.4;
 if(p.y>H+20||p.x<-30||p.x>W+30)Object.assign(p,mk(0));
 const nr=st.glow?Math.max(0,1-Math.hypot(p.x-px,p.y-py)/170):0;
-c.save();c.translate(p.x,p.y);c.rotate(p.a);c.globalAlpha=Math.min(1,.35+nr*.65+bp*.2);c.fillStyle=c.strokeStyle='#fff';c.lineWidth=1.2;if(st.glow){c.shadowColor='#fff';c.shadowBlur=3+nr*16}shp(st.kind,p.r);st.kind=='dot'?c.fill():c.stroke();c.restore()}
+c.save();c.translate(p.x,p.y);c.rotate(p.a);c.globalAlpha=Math.min(1,.35+nr*.65+bp*.2);c.fillStyle=c.strokeStyle='#fff';c.lineWidth=1.2;if(st.glow&&bp>.05){c.shadowColor='#fff';c.shadowBlur=4+bp*10}shp(st.kind,p.r);st.kind=='dot'?c.fill():c.stroke();c.restore()}
 for(let i=R.length;i--;){const r=R[i];r.t+=.022;if(r.t>1){R.splice(i,1);continue}c.save();c.beginPath();c.arc(r.x,r.y,r.t*210*r.s,0,7);c.strokeStyle='#fff';c.globalAlpha=(1-r.t)*(st.glow?.55:.25);c.lineWidth=2;if(st.glow){c.shadowColor='#fff';c.shadowBlur=22}c.stroke();c.restore()}
 for(let i=trail.length;i--;){trail[i].t+=.03;if(trail[i].t>1)trail.splice(i,1)}
 if(trail.length>1){c.save();c.lineCap='round';c.strokeStyle='#fff';c.shadowColor='#fff';c.shadowBlur=14;for(let i=1;i<trail.length;i++){const a=trail[i-1],b=trail[i];c.globalAlpha=(1-b.t)*.8;c.lineWidth=3*(1-b.t)+.5;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}c.restore()}
@@ -174,7 +175,7 @@ const vSet=()=>[`<div class="win st" style="margin-top:0"><h2>${t('sBg')}</h2><d
 <h2 style="font-size:15px;margin:16px 0 10px">${t('sLang')}</h2><div class="lg">${LN.map(([c,n])=>`<button class="ch${c==lang?' on':''}" data-l="${c}"><b>${c.toUpperCase()}</b>${n}</button>`).join('')}</div>
 <div class="f" style="margin-top:14px"><input id="sv" placeholder=" " value="${esc(G('sf_api',''))}" autocapitalize="none" spellcheck="false"><label for="sv">${t('sSrv')}</label></div><button class="btn g" data-a="test" style="width:100%">${t('sTest')}</button><div class="msg" id="sm"></div><button class="btn g" id="lo" style="width:100%">${t('out')}</button></div>`,()=>{}];
 /* ===== auth ===== */
-function vAuth(){step='';const r=mode=='r';$('#nv').hidden=true;show(`<div class="win st"><div class="logo">sh1zuho <span>finder</span></div><div class="tabs${r?' r':''}" id="tb"><i></i><button data-m="l" class="${r?'':'on'}">${t('login')}</button><button data-m="r" class="${r?'on':''}">${t('reg')}</button></div><div id="fm"><div class="f"><input id="u" placeholder=" " autocomplete="username" autocapitalize="none" spellcheck="false"><label for="u">${t('user')}</label></div><div class="col${r?' o':''}" id="em"><div><div class="f"><input id="e" type="email" placeholder=" " autocomplete="email"><label for="e">${t('mail')}</label></div></div></div><div class="f"><input id="p" type="password" placeholder=" " autocomplete="${r?'new-password':'current-password'}"><label for="p">${t('pass')}</label></div></div><div class="msg" id="ms"></div><button class="btn" id="ok" style="width:100%">${t(r?'reg':'login')}</button><div class="hint">${srv?'':t('local')}</div></div>`)}
+function vAuth(){step='';const r=mode=='r';$('#nv').hidden=true;show(`<div class="win st"><div class="logo">sh1zuho <span>finder</span></div><div class="tabs${r?' r':''}" id="tb"><i></i><button data-m="l" class="${r?'':'on'}">${t('login')}</button><button data-m="r" class="${r?'on':''}">${t('reg')}</button></div><div id="fm"><div class="f"><input id="u" placeholder=" " autocomplete="username" autocapitalize="none" spellcheck="false"><label for="u">${t('user')}</label></div><div class="col${r?' o':''}" id="em"><div><div class="f"><input id="e" type="email" placeholder=" " autocomplete="email"><label for="e">${t('mail')}</label></div></div></div><div class="f"><input id="p" type="password" placeholder=" " autocomplete="${r?'new-password':'current-password'}"><label for="p">${t('pass')}</label></div></div><div class="msg" id="ms"></div><button class="btn" id="ok" style="width:100%">${t(r?'reg':'login')}</button><div class="hint"${srv?'':' data-a="retry" style="cursor:pointer"'}>${srv?t('ok'):t('fail')+' ↻'}</div></div>`)}
 const busy=b=>$('#ok')?.classList.toggle('ld',b);
 function fail(k){$('#ms').textContent=t(k);const w=$('.win');w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake')}
 function enter(u,tok){sess={...u,token:tok};S('sf_sess',sess);tab='cat';vHome()}
@@ -203,11 +204,12 @@ else if(d.k){st.kind=d.k;sav();document.querySelectorAll('.ch').forEach(c=>c.cla
 else if(d.l){lang=d.l;S('sf_lang',lang);document.documentElement.lang=lang;if($('#go')){document.querySelectorAll('.ch').forEach(c=>c.classList.toggle('on',c==x));const p=$('#pk');p.textContent=t('pick');p.classList.remove('sw');void p.offsetWidth;p.classList.add('sw')}else vHome()}
 else if(d.s){st[d.s]=st[d.s]?0:1;sav();x.classList.toggle('on')}
 else if(d.m){mode=d.m;const r=mode=='r';$('#tb').classList.toggle('r',r);document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b==x));$('#em').classList.toggle('o',r);$('#ok').textContent=t(r?'reg':'login');$('#ms').textContent=''}
+else if(d.a=='retry'){x.textContent='…';await probe();vAuth()}
 else if(d.a=='test'){S('sf_api',$('#sv').value.trim());await probe();$('#sm').textContent=t(srv?'ok':'fail');if(srv&&!sess.token){sess=null;S('sf_sess',null);setTimeout(vAuth,900)}}
 else if(x.id=='ai'){aiOn=aiOn?0:1;S('sf_ai',aiOn);srvIds=null;vHome()}
 else if(x.id=='sy'){x.classList.add('sp');await load();list(1);info();x.classList.remove('sp')}
 else if(x.id=='up'){const b=$('#up'),m=$('#um');b.classList.add('ld');m.textContent=t('chk');try{await jf('/api/upload',{code:$('#uc').value.trim(),n:$('#un').value,a:$('#ua').value});m.textContent=t('done');await load();$('#uc').value=$('#un').value=$('#ua').value=''}catch(e){m.textContent=t(e.e=='bad'?'bad':e.e=='dup'?'dup':'err')}b.classList.remove('ld')}
-else if(x.id=='lo'){sess=null;S('sf_sess',null);mode='l';vAuth()}
+else if(x.id=='lo'){A.pause();$('#pl').hidden=true;cur=null;sess=null;S('sf_sess',null);mode='l';vAuth()}
 else if(x.id=='ok')submit();
 else if(x.id=='pp')A.src&&(A.paused?A.play():A.pause())});
 document.addEventListener('input',e=>{const i=e.target.id;
@@ -217,5 +219,5 @@ document.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.closest('#fm
 $('#pl').addEventListener('click',e=>{if(e.target.closest('#pp')||!A.duration)return;const r=$('#pl').getBoundingClientRect();A.currentTime=(e.clientX-r.left)/r.width*A.duration});
 const rf=()=>{if(!document.hidden&&tab=='cat')load().then(()=>{list(0);info()})};document.addEventListener('visibilitychange',rf);setInterval(rf,6e4);
 const vLangPick=()=>show(`<div class="win st"><div class="logo">sh1zuho <span>finder</span></div><h2 id="pk" class="sw">${t('pick')}</h2><div class="lg">${LN.map(([c,n],i)=>`<button class="ch st${c==lang?' on':''}" style="--i:${i+2}" data-l="${c}"><b>${c.toUpperCase()}</b>${n}</button>`).join('')}</div><button class="btn st" style="--i:11;width:100%;margin-top:18px" id="go">OK</button></div>`);
-(async()=>{rs();frame();document.documentElement.lang=lang;await Promise.all([probe(),intro()]);G('sf_langset',0)?(sess?vHome():vAuth()):vLangPick()})();
+(async()=>{rs();frame();document.documentElement.lang=lang;await Promise.all([probe(),intro()]);if(srv&&sess&&!sess.token){sess=null;S('sf_sess',null)}G('sf_langset',0)?(sess?vHome():vAuth()):vLangPick()})();
 </script></body></html>
