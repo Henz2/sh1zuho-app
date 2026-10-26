@@ -318,7 +318,7 @@ if(!l||!p||r&&(!/^[a-z0-9_]{3,20}$/.test(l)||p.length<6||!/^\S+@\S+\.\S+$/.test(
 busy(1);try{if(!r){if(srv)done(await jf('/api/login',{login:l,pass:p}));else{const u=users[l];if(!u||u.hash!==await hp(l,p))throw 0;enter({login:l,role:u.role||'user'})}}
 else if(srv){const j=await jf('/api/register',{login:l,email:e,pass:p});if(j.sent){step='code';pend=l;$('#fm').innerHTML=`<p class="msg sw">${t('sent')} ${esc(e)}</p><div class="f sw"><input id="cd" inputmode="numeric" maxlength="6" placeholder=" " autocomplete="one-time-code" style="letter-spacing:.5em;font-size:22px"><label for="cd">${t('code')}</label></div>`;$('#ok').textContent=t('confirm');$('#cd').focus()}else done(j)}
 else{if(users[l])throw{e:'taken'};users[l]={hash:await hp(l,p),email:e,role:'user'};S('sf_users',users);enter({login:l,role:'user'})}}
-catch(x){fail(x&&x.e=='taken'?'taken':'err')}busy(0)}
+catch(x){fail(x&&x.e=='taken'?'taken':'err');if(x&&(x.e=='mail'||x.e=='rate'))$('#ms').textContent+=' ['+x.e+(x.d?' '+x.d:'')+']'}busy(0)}
 /* ===== events ===== */
 async function cp(b){try{await navigator.clipboard.writeText(b.dataset.c)}catch{const x=document.createElement('textarea');x.value=b.dataset.c;document.body.append(x);x.select();document.execCommand('copy');x.remove()}const o=b.textContent;b.textContent='✓';b.classList.add('on');toast(t('copied'));setTimeout(()=>{b.textContent=o;b.classList.remove('on')},1400)}
 const sav=()=>S('sf_st',st);
